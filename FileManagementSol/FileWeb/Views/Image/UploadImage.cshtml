@@ -1,0 +1,40 @@
+﻿@model List<ImageRes>;
+
+@{
+    ViewBag.Title = "Upload Image";
+}
+
+<div class="container-fluid">
+
+    <partial name="_alertMessages" />
+
+    @using (Html.BeginForm("UploadImage", "Image", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        <div class="card">
+            <div class="card-header">
+                <h4 class="card-title">Images List</h4>
+            </div>
+            <div class="card-body">
+
+
+                @Html.AntiForgeryToken()
+                <div class="row">
+                    <div class="col-md-4">
+                        <input type="file" name="file" />
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="card-footer">
+                <div class="row d-flex justify-content-around">
+                    <div class="col-md-6">
+                        <a href="@Url.Action("Index", "Image")" class=" btn btn-sm btn-secondary"> Back to List</a>
+                    </div><div class="col-md-6">
+                        <input type="submit" value="Upload" class="btn btn-sm btn-primary" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>

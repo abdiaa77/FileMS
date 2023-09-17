@@ -1,0 +1,50 @@
+﻿@model List<ImageRes>;
+
+@{
+    ViewBag.Title = "Images";
+}
+
+<div class="container-fluid">
+
+    <partial name="_alertMessages" />
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="card-title">Images List</h4>
+        </div>
+        <div class="card-body">
+            <div class="rown d-flex justify-content-end">
+                <div class="col-md-4">
+                    <a href="@Url.Action("UploadImage", "Image")" class="btn btn-primary">Upload Image</a>
+                </div>
+            </div>
+            <div class="row">
+
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Image Name</th>
+                            <th scope="col">Image</th>
+                            <th scope="col">Uploaded At</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        @for (int i = 0; i < Model.Count; i++)
+                        {
+                            <tr>
+                                <th scope="row">@(i + 1)</th>
+                                <td>@Model[i].ImageName</td>
+                                <td><img src="@Url.Action("GetImage", "Download", new{ image = Model[i].ImageName})" height="80" width="80" alt="missing image" /></td>
+                                <td><img src="@Model[i].ImageName" alt="Image" width="60" height="60" /></td>
+                                <td>@Model[i].UploadedAt</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+            </div>
+        </div>
+    </div>
+</div>
+
