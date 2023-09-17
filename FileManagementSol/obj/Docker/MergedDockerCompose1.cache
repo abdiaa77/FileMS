@@ -1,0 +1,100 @@
+name: dockercompose15492952849950785127
+services:
+  file_api:
+    build:
+      context: D:\Projects\dotNET\TestProjects\ASPnetCore\ASPnetCoreCodeSnippets\FileManagementSol
+      dockerfile: FileApi/Dockerfile
+    depends_on:
+      file_db:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORT: https://*:5001
+      ASPNETCORE_URLS: http://+:5000
+      ConnectionStrings__fileDbConnStr: server=file_db;port=3306;database=file_db;user=root;password=root;
+    image: file_api
+    networks:
+      fileNet: null
+    ports:
+    - mode: ingress
+      target: 5000
+      published: "5000"
+      protocol: tcp
+    restart: unless-stopped
+    volumes:
+    - type: volume
+      source: fileVolume
+      target: /var/lib/app
+      volume: {}
+  file_db:
+    container_name: file_db
+    environment:
+      MYSQL_DATABASE: file_db
+      MYSQL_PASSWORD: root
+      MYSQL_ROOT_PASSWORD: root
+    image: mysql:8.1
+    networks:
+      fileNet: null
+    ports:
+    - mode: ingress
+      target: 3306
+      published: "3306"
+      protocol: tcp
+    restart: unless-stopped
+    volumes:
+    - type: volume
+      source: fileVolume
+      target: /var/lib/mysql
+      volume: {}
+  file_web:
+    build:
+      context: D:\Projects\dotNET\TestProjects\ASPnetCore\ASPnetCoreCodeSnippets\FileManagementSol
+      dockerfile: FileWeb/Dockerfile
+    depends_on:
+      file_db:
+        condition: service_started
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORT: https://*:5001
+      ASPNETCORE_URLS: http://+:5000
+      ConnectionStrings__fileDbConnStr: server=file_db;port=3306;database=file_db;user=root;password=root;
+    image: file_web
+    networks:
+      fileNet: null
+    ports:
+    - mode: ingress
+      target: 3000
+      published: "3000"
+      protocol: tcp
+    restart: unless-stopped
+    volumes:
+    - type: volume
+      source: fileVolume
+      target: /var/lib/app
+      volume: {}
+  phpMyadmin:
+    container_name: phpmyadmin
+    depends_on:
+      file_db:
+        condition: service_started
+    environment:
+      PMA_HOST: file_db
+      PMA_PASSWORD: root
+      PMA_PORT: "3306"
+      PMA_USER: root
+    image: phpmyadmin:latest
+    networks:
+      fileNet: null
+    ports:
+    - mode: ingress
+      target: 80
+      published: "8080"
+      protocol: tcp
+    restart: unless-stopped
+networks:
+  fileNet:
+    name: dockercompose15492952849950785127_fileNet
+    driver: bridge
+volumes:
+  fileVolume:
+    name: dockercompose15492952849950785127_fileVolume

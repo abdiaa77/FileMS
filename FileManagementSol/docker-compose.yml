@@ -1,0 +1,79 @@
+version: '3.4'
+networks:
+  fileNet:
+    driver: bridge
+
+services:
+  file_db:
+    image: mysql:8.1
+    container_name: file_db
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=file_db
+      - MYSQL_PASSWORD=root
+    volumes:
+      - fileVolume:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    networks:
+      - fileNet
+    restart: unless-stopped
+
+  file_api:
+    image: ${DOCKER_REGISTRY-}file_api
+    build:
+      context: .
+      dockerfile: FileApi/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORT=https://*:5001
+      - ASPNETCORE_URLS=http://+:5000
+      - "ConnectionStrings__fileDbConnStr=server=file_db;port=3306;database=file_db;user=root;password=root;"
+    networks:
+      - fileNet
+    ports:
+      - "5000:5000"
+    volumes:
+      - fileVolume:/var/lib/app
+    depends_on:
+      - file_db
+    restart: unless-stopped
+
+  file_web:
+    image: ${DOCKER_REGISTRY-}file_web
+    build:
+      context: .
+      dockerfile: FileWeb/Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORT=https://*:3001
+      - ASPNETCORE_URLS=http://+:3000
+      - "ConnectionStrings__fileDbConnStr=server=file_db;port=3306;database=file_db;user=root;password=root;"
+    networks:
+      - fileNet
+    ports:
+      - "3000:3000"
+    volumes:
+      - fileVolume:/var/lib/app
+    depends_on:
+      - file_db
+    restart: unless-stopped
+  
+  phpMyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin
+    environment:
+      - PMA_HOST=file_db
+      - PMA_PORT=3306
+      - PMA_USER=root
+      - PMA_PASSWORD=root
+    ports:
+      - "8080:80"
+    networks:
+      - fileNet
+    depends_on:
+      - file_db
+    restart: unless-stopped
+
+volumes:
+  fileVolume:
